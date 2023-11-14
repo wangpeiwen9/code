@@ -1,0 +1,406 @@
+UI_CONFIG:
+  title: 预测系统
+  input:
+    image:
+      hint: 影像数据目录
+      required: true
+      type: file
+    mask:
+      hint: Mask掩膜数据位置
+      required: false
+      type: file
+    age:
+      hint: 年龄大小，0~100
+      require: true
+      type: flot
+      range:
+        - 0
+        - 100
+    gender:
+      hint: 
+      require: true
+      type: float
+      choice:
+        - 女
+        - 男
+  output:
+    features:
+      hint: 影像特征
+      type: table
+    prediction:
+      hint: 预测标签
+      type: flag
+    probably:
+      hint: 预测概率
+      type: bar
+rad_model:
+  hint: 影像组学模型
+  model_name: LightGBM
+  model_path: C:\OnekeyTasks\BaiduSyncdisk\TaskSpec51-YangCun\models/MLP_label.pkl
+  feature_extractor:
+  transform: 
+    Age:
+      mean: 28.952380952380953
+      std: 17.170235356994166
+    Gender:
+      mean: 0.6071428571428571
+      std: 0.49131878451841643
+    label:
+      mean: 0.5714285714285714
+      std: 0.4978438881870134
+    original_firstorder_10Percentile:
+      mean: 667.9583333333334
+      std: 186.22676499904097
+    original_firstorder_90Percentile:
+      mean: 1587.4916666666668
+      std: 256.07844252279335
+    original_firstorder_Energy:
+      mean: 139474621249.36905
+      std: 198549040192.57718
+    original_firstorder_Entropy:
+      mean: 5.706414360273126
+      std: 0.27204678904840546
+    original_firstorder_InterquartileRange:
+      mean: 532.6339285714286
+      std: 104.6651462570367
+    original_firstorder_Kurtosis:
+      mean: 2.652519678005337
+      std: 1.0253216470921243
+    original_firstorder_Maximum:
+      mean: 2113.2261904761904
+      std: 494.3193775451636
+    original_firstorder_Mean:
+      mean: 1134.296655175619
+      std: 213.99391149978047
+    original_firstorder_MeanAbsoluteDeviation:
+      mean: 287.6330474105678
+      std: 55.53460301809983
+    original_firstorder_Median:
+      mean: 1144.607142857143
+      std: 228.13809059887353
+    original_firstorder_Minimum:
+      mean: -391.26190476190476
+      std: 532.622588842912
+    original_firstorder_Range:
+      mean: 2504.4880952380954
+      std: 814.9815504460286
+    original_firstorder_RobustMeanAbsoluteDeviation:
+      mean: 216.88749750768537
+      std: 42.47485473410224
+    original_firstorder_RootMeanSquared:
+      mean: 1187.7503939558715
+      std: 214.00254532123765
+    original_firstorder_Skewness:
+      mean: -0.11891939682005664
+      std: 0.3157678423029986
+    original_firstorder_TotalEnergy:
+      mean: 10626233725.641977
+      std: 12036863105.298397
+    original_firstorder_Uniformity:
+      mean: 0.021214631602445928
+      std: 0.004111168914283974
+    original_firstorder_Variance:
+      mean: 124125.74765371208
+      std: 50736.04702175436
+    original_glcm_Autocorrelation:
+      mean: 4643.465787922963
+      std: 2944.56906570427
+    original_glcm_ClusterProminence:
+      mean: 1205918.3715485018
+      std: 2110285.7110421173
+    original_glcm_ClusterShade:
+      mean: -2863.5464545834557
+      std: 11045.018575835793
+    original_glcm_ClusterTendency:
+      mean: 576.3187767212672
+      std: 221.02193221064178
+    original_glcm_Contrast:
+      mean: 161.6660176576354
+      std: 80.0070836470139
+    original_glcm_Correlation:
+      mean: 0.5669948179863601
+      std: 0.09832256605068417
+    original_glcm_DifferenceAverage:
+      mean: 9.176184392239682
+      std: 2.2311488881572474
+    original_glcm_DifferenceEntropy:
+      mean: 4.598837481909419
+      std: 0.3429749414483492
+    original_glcm_DifferenceVariance:
+      mean: 70.22905629910626
+      std: 34.660691647962324
+    original_glcm_Id:
+      mean: 0.21536460131628263
+      std: 0.03569222230560665
+    original_glcm_Idm:
+      mean: 0.13401360708071566
+      std: 0.03287156438503739
+    original_glcm_Idmn:
+      mean: 0.9835137291487209
+      std: 0.007850149244613754
+    original_glcm_Idn:
+      mean: 0.9183535841705563
+      std: 0.01852096502345011
+    original_glcm_Imc1:
+      mean: -0.08174450566257717
+      std: 0.026072837077200196
+    original_glcm_Imc2:
+      mean: 0.7385354443227057
+      std: 0.06589249947820987
+    original_glcm_InverseVariance:
+      mean: 0.1377402148114853
+      std: 0.03183833130206913
+    original_glcm_JointAverage:
+      mean: 63.736855131745514
+      std: 21.97913127229417
+    original_glcm_JointEnergy:
+      mean: 0.0007695153843257287
+      std: 0.00034230076026116405
+    original_glcm_JointEntropy:
+      mean: 10.891312190875746
+      std: 0.571930030537612
+    original_glcm_MCC:
+      mean: 0.6703274966927465
+      std: 0.10158718490497497
+    original_glcm_MaximumProbability:
+      mean: 0.002264808953082746
+      std: 0.0011354984782883449
+    original_glcm_SumAverage:
+      mean: 127.47371026349103
+      std: 43.9582625445883
+    original_glcm_SumEntropy:
+      mean: 6.518922750219947
+      std: 0.2620655435271802
+    original_glcm_SumSquares:
+      mean: 184.49619859472563
+      std: 71.24539946057692
+    original_gldm_DependenceEntropy:
+      mean: 7.611042414673924
+      std: 0.23201117214869327
+    original_gldm_DependenceNonUniformity:
+      mean: 29159.762437107678
+      std: 40174.73581717854
+    original_gldm_DependenceNonUniformityNormalized:
+      mean: 0.31263762848598264
+      std: 0.06151215849224746
+    original_gldm_DependenceVariance:
+      mean: 1.7936597975383386
+      std: 1.1152640954243165
+    original_gldm_GrayLevelNonUniformity:
+      mean: 1961.1349524634563
+      std: 2483.5788322679527
+    original_gldm_GrayLevelVariance:
+      mean: 198.6717045827602
+      std: 81.14577476343378
+    original_gldm_HighGrayLevelEmphasis:
+      mean: 4506.061805025159
+      std: 2875.3855554814268
+    original_gldm_LargeDependenceEmphasis:
+      mean: 6.210280886404648
+      std: 2.744560981139337
+    original_gldm_LargeDependenceHighGrayLevelEmphasis:
+      mean: 29527.96500994754
+      std: 21578.10365234965
+    original_gldm_LargeDependenceLowGrayLevelEmphasis:
+      mean: 0.016969978167696947
+      std: 0.10566465506610856
+    original_gldm_LowGrayLevelEmphasis:
+      mean: 0.0009338693825086082
+      std: 0.0013479993408950957
+    original_gldm_SmallDependenceEmphasis:
+      mean: 0.5323334135962734
+      std: 0.07736749842886638
+    original_gldm_SmallDependenceHighGrayLevelEmphasis:
+      mean: 2326.5847637542415
+      std: 1769.5755283141875
+    original_gldm_SmallDependenceLowGrayLevelEmphasis:
+      mean: 0.0005080530432589392
+      std: 0.0007808730039735757
+    original_glrlm_GrayLevelNonUniformity:
+      mean: 1878.0689272764232
+      std: 2393.5280343604395
+    original_glrlm_GrayLevelNonUniformityNormalized:
+      mean: 0.021204134815488978
+      std: 0.004123365728298251
+    original_glrlm_GrayLevelVariance:
+      mean: 198.02574386784968
+      std: 80.0750270023326
+    original_glrlm_HighGrayLevelRunEmphasis:
+      mean: 4481.805212917528
+      std: 2869.8720446822476
+    original_glrlm_LongRunEmphasis:
+      mean: 1.1425334819460136
+      std: 0.06082701314066667
+    original_glrlm_LongRunHighGrayLevelEmphasis:
+      mean: 5156.280983732858
+      std: 3201.778376466244
+    original_glrlm_LongRunLowGrayLevelEmphasis:
+      mean: 0.0011844628983798881
+      std: 0.00214925589197974
+    original_glrlm_LowGrayLevelRunEmphasis:
+      mean: 0.0009124952947991953
+      std: 0.0012690912595604922
+    original_glrlm_RunEntropy:
+      mean: 5.9502229660362405
+      std: 0.23934239788960707
+    original_glrlm_RunLengthNonUniformity:
+      mean: 84068.89859828593
+      std: 108926.68413137824
+    original_glrlm_RunLengthNonUniformityNormalized:
+      mean: 0.9250220646572467
+      std: 0.020882125385124392
+    original_glrlm_RunPercentage:
+      mean: 0.9587743903054429
+      std: 0.013624663899272265
+    original_glrlm_RunVariance:
+      mean: 0.05302685023473915
+      std: 0.028298983106267956
+    original_glrlm_ShortRunEmphasis:
+      mean: 0.9701557415879487
+      std: 0.00894883081316738
+    original_glrlm_ShortRunHighGrayLevelEmphasis:
+      mean: 4340.7879848819
+      std: 2802.9820922622066
+    original_glrlm_ShortRunLowGrayLevelEmphasis:
+      mean: 0.0008756035755310357
+      std: 0.0012067366540966795
+    original_glszm_GrayLevelNonUniformity:
+      mean: 1186.4494813638803
+      std: 1587.3186464162802
+    original_glszm_GrayLevelNonUniformityNormalized:
+      mean: 0.02167066791147594
+      std: 0.004619208614066648
+    original_glszm_GrayLevelVariance:
+      mean: 191.79277418610332
+      std: 79.50617979290392
+    original_glszm_HighGrayLevelZoneEmphasis:
+      mean: 4214.447028341609
+      std: 2807.12269818962
+    original_glszm_LargeAreaEmphasis:
+      mean: 16.576663359095857
+      std: 34.16560186727642
+    original_glszm_LargeAreaHighGrayLevelEmphasis:
+      mean: 83170.7865439694
+      std: 203651.37838049154
+    original_glszm_LargeAreaLowGrayLevelEmphasis:
+      mean: 0.027001079733790935
+      std: 0.15899823405592506
+    original_glszm_LowGrayLevelZoneEmphasis:
+      mean: 0.0010040045648086536
+      std: 0.0016519616130527977
+    original_glszm_SizeZoneNonUniformity:
+      mean: 31030.16941668584
+      std: 42733.172322913946
+    original_glszm_SizeZoneNonUniformityNormalized:
+      mean: 0.5498744752422405
+      std: 0.05233783437897648
+    original_glszm_SmallAreaEmphasis:
+      mean: 0.7686664132641728
+      std: 0.03552604073057986
+    original_glszm_SmallAreaHighGrayLevelEmphasis:
+      mean: 3193.888083600607
+      std: 2252.2061008945266
+    original_glszm_SmallAreaLowGrayLevelEmphasis:
+      mean: 0.0008157622787569725
+      std: 0.0013921342926370168
+    original_glszm_ZoneEntropy:
+      mean: 7.077530676255083
+      std: 0.1846757498198729
+    original_glszm_ZonePercentage:
+      mean: 0.6016046506574115
+      std: 0.08397614069026556
+    original_glszm_ZoneVariance:
+      mean: 13.611605873387997
+      std: 33.30598892513625
+    original_ngtdm_Busyness:
+      mean: 1.6887924433961645
+      std: 1.6041361930796527
+    original_ngtdm_Coarseness:
+      mean: 0.00021862239970225927
+      std: 0.00016544860521206967
+    original_ngtdm_Complexity:
+      mean: 30346.83491606543
+      std: 26553.994529459127
+    original_ngtdm_Contrast:
+      mean: 0.3144797862048371
+      std: 0.14686789779832982
+    original_ngtdm_Strength:
+      mean: 0.7293872643873665
+      std: 0.7093057754622508
+    original_shape_Elongation:
+      mean: 0.7372424677315932
+      std: 0.13153179301211299
+    original_shape_Flatness:
+      mean: 0.41744980606551607
+      std: 0.11392824801328978
+    original_shape_LeastAxisLength:
+      mean: 24.701745710965763
+      std: 14.824846678934524
+    original_shape_MajorAxisLength:
+      mean: 57.40578274890814
+      std: 23.30123360319112
+    original_shape_Maximum2DDiameterColumn:
+      mean: 55.648260093515376
+      std: 19.30780799274007
+    original_shape_Maximum2DDiameterRow:
+      mean: 55.38032468670391
+      std: 20.986057365411444
+    original_shape_Maximum2DDiameterSlice:
+      mean: 46.61075765724567
+      std: 19.42579672534514
+    original_shape_Maximum3DDiameter:
+      mean: 64.23081876675897
+      std: 22.201945182876287
+    original_shape_MeshVolume:
+      mean: 7910.39891288797
+      std: 9416.708055390653
+    original_shape_MinorAxisLength:
+      mean: 41.04200422230476
+      std: 15.20339105796857
+    original_shape_Sphericity:
+      mean: 0.24271578943416472
+      std: 0.0671098190195663
+    original_shape_SurfaceArea:
+      mean: 9536.39053510841
+      std: 10939.989395791083
+    original_shape_SurfaceVolumeRatio:
+      mean: 1.225244587385085
+      std: 0.2887996115159052
+    original_shape_VoxelVolume:
+      mean: 7957.684093564125
+      std: 9480.792961572135
+  sel_features:
+    - original_firstorder_TotalEnergy
+    - original_ngtdm_Strength
+    - original_shape_Maximum2DDiameterColumn
+    - original_shape_MinorAxisLength
+    - Age
+clinical_model:
+  hint: 临床模型
+  model_name: LightGBM
+  model_path: clinical_model.pkl
+  sel_features:
+    - Age
+    - Gender
+segmentation3d_model:
+  hint: 自动分割模型
+  model_name: Unet
+  transform_params: 
+  model_path: D:\20220928-YangCun\models\Nose_unet_best_metric_model.pth
+  model_params:
+    spatial_dims: 3
+    in_channels: 1
+    channels:
+      - 16
+      - 32
+      - 64
+      - 128
+      - 256
+    strides:
+      - 2
+      - 2
+      - 2
+      - 2
+    num_res_units: 2
+    norm: batch
+

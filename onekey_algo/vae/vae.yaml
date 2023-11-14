@@ -1,0 +1,31 @@
+model_params:
+  name: 'FlatVAE'
+  in_channels: 1
+  latent_dim: 32
+  feature_len: 258
+  stride: 1
+
+
+data_params:
+  data_path: "/Users/zhangzhiwei/Downloads/TCGA-RPPA-pancan-clean_norm.xena.csv"
+  train_batch_size: 64
+  val_batch_size:  64
+  num_workers: 4
+  not_use_columns: "ID"
+
+
+exp_params:
+  LR: 0.001
+  weight_decay: 0.0
+  scheduler_gamma: 0.95
+  kld_weight: 0.0005
+  manual_seed: 1265
+
+trainer_params:
+  gpus: []
+  max_epochs: 100
+
+logging_params:
+  save_dir: "/Users/zhangzhiwei/logs/"
+  name: "FlatVAE"
+  

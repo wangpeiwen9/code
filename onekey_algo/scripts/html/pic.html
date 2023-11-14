@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <style>
+        .div-unit {
+            height: 460px;
+            width: 95%;
+            float: left;
+            border: 1px solid black;
+            margin-left: 5px;
+            margin-top: 10px;
+        }
+
+        .div-head {
+            display: flex;
+            height: 50px;
+            align-items: center;
+            border-bottom: 1px solid #ddd
+        }
+
+        .div-pic-list {
+            height: 400px;
+            float: left;
+            border-right: 1px solid #ddd;
+            margin-left: 5px;
+            display: flex;
+            width: 100%;
+            overflow-x: scroll;
+        }
+
+        .pic {
+            margin-top: 25px;
+            width: 600px;
+            height: 300px;
+            margin-left: 5px;
+        }
+        .desc {
+            width: 600px;
+            height: 50px;
+        }
+        .modal {
+            position: fixed;
+            top: -20% !important;
+            left: -50%;!important;
+        }
+    </style>
+    <link rel="stylesheet" href="/resource?name=bootstrap.min.css">
+    <script src="/resource?name=jquery.min.js"></script>
+    <script src="/resource?name=bootstrap.min.js"></script>
+    <script>
+        var bigShow = false;
+        var imgs;
+        var currentWidth = null
+        var originalWidth = null
+        $(function () {
+            $('#imgBiggerDiv').on('show.bs.modal', function (event) {
+                imgs = $(event.relatedTarget).find('img');
+                imgs.each(function () {
+                    var src = $(this).attr("src");
+                    var image = new Image();
+                    image.src = src;
+                    //图片原始的宽度和长度
+                    originalWidth = image.width;
+                })
+                showPictrues(imgs)
+            });
+        })
+
+        function showPictrues(imgs2Show) {
+            var imgBiggerBody = $('#imgBiggerBody');
+            imgBiggerBody.empty();
+            if (currentWidth == null) {
+                imgs2Show.each(function () {
+                    var src = $(this).attr("src");
+                    var image = new Image();
+                    image.src = src;
+                    //图片原始的宽度和长度
+                    originalWidth = image.width;
+                    currentWidth = originalWidth;
+                    let maxWidth= window.screen.width*0.8
+                    if(currentWidth>maxWidth){
+                        currentWidth=maxWidth;
+                    }
+                })
+            }
+            $.each(imgs2Show, function (i, n) {
+                imgBiggerBody.append("<img src='" + n.src + "' style='margin: 0px;width:" +
+                    currentWidth + "px;'>");
+            });
+            contentWidth = currentWidth + 2;
+            $('#imgBiggerBody').css("width", currentWidth + "px");
+            $('#imgBiggerContent').css("width", contentWidth + "px");
+            bigShow = true;
+        }
+
+        $(document).mousedown(function (event) {
+            if (bigShow == true) {
+                if (event.target.type == 'button') {
+                    type = event.target.getAttribute('desc');
+                    operate(type);
+                    return;
+                }
+                $('#biggerDivButton').click();
+                bigShow = false;
+                imgs = null;
+                currentWidth = null;
+                originalWidth = null;
+            }
+        });
+
+        function operate(type) {
+            if (type == 0) {
+                currentWidth = originalWidth
+                console.info("currentWidth=" + currentWidth)
+            }
+            if (type == 1) {
+                currentWidth = currentWidth * 1.1;
+            }
+            if (type == 2) {
+                currentWidth = currentWidth * 0.9;
+            }
+            showPictrues(imgs);
+        }
+
+        function beginTest() {
+            let dir = $("#dir").val();
+            if (isStrEmpty(dir)) {
+                alert("文件目录为空")
+                return
+            }
+            let map = {"dir": dir};
+            $.ajax({
+                url: "/model/get",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(map),
+                success: function (result) {
+                    $("#container").empty();
+                    let modelList = result
+                    for (let i = 0; i < modelList.length; i++) {
+                        let model = modelList[i];
+                        model.id = getId(model.model_name)
+                        addOneModel(model)
+                    }
+                },
+            })
+        }
+
+        function addOneModel(model) {
+            let div = $("<div class='div-unit'></div>");
+            let label = $("<label style='margin-left: 100px;font-size: 20px'>模型算法:" + model.model_name +
+                "</label>")
+            let file = $("<input type='file' style='margin-left: 25px' id='file_" + model.id + "'>")
+            let button = $("<button class='btn btn-default' modelName='" + model.model_name +
+                "' onclick='modelTest(this)'>开始验证算法</button>")
+            let head = $("<div class='div-head'></div>");
+            head.append(label)
+            head.append(file)
+            head.append(button)
+            div.append(head)
+            let picList = $("<div class='div-pic-list' id='file_list_" + model.id + "'></div>");
+            for (let i = 0; i < model.result_list.length; i++) {
+                let obj = model.result_list[i]
+                let picUnit = getPicUnit(obj)
+                picList.append(picUnit)
+            }
+            div.append(picList)
+            $("#container").append(div)
+        }
+
+        function getPicUnit(obj) {
+            let picUnit = $("<div class='pic-unit'></div>");
+            let pic = $("<div class='pic' data-toggle='modal' data-target='#imgBiggerDiv'></div>");
+            let img = $("<img src='" + obj.img + "' style='width: 100%;height: 100%'></img>");
+            let desc = $("<div class='desc'>" + obj.desc + "</div>");
+            pic.append(img)
+            pic.append(desc)
+            picUnit.append(pic)
+            return picUnit
+        }
+
+        function modelTest(obj) {
+            let modelName = $(obj).attr("modelName")
+            var fileObj = document.getElementById("file_" + getId(modelName)).files[0]; // js 获取文件对象
+            if (typeof (fileObj) == "undefined" || fileObj.size <= 0) {
+                alert("请选择测试图片");
+                return;
+            }
+            var formFile = new FormData();
+            formFile.append("action", "/model/test");
+            formFile.append("file", fileObj);
+            formFile.append("modelName", modelName);
+            var data = formFile;
+            $.ajax({
+                url: "/model/test",
+                data: data,
+                type: "Post",
+                dataType: "json",
+                cache: false,//上传文件无需缓存
+                processData: false,//用于对data参数进行序列化处理 这里必须false
+                contentType: false, //必须
+                success: function (result) {
+                    let picList = result
+                    let fileListId = "file_list_" + getId(modelName);
+                    for (let i = 0; i < picList.length; i++) {
+                        let obj = picList[i]
+                        let picUnit = getPicUnit(obj)
+                        $("#" + fileListId).prepend(picUnit)
+                    }
+                },
+            })
+        }
+
+        function isStrEmpty(obj) {
+            if (typeof obj == "undefined" || obj == null || obj == "") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+
+        function getId(modelName) {
+            return modelName.replace(".", "-")
+        }
+    </script>
+</head>
+<body>
+<div class="panel panel-default" style="margin-bottom: 20px;margin-top: 0px;">
+    <div class="panel-heading">
+        <div class="form-group" style="display:flex;align-items: center;margin-left: 200px">
+            <label for="dir">文件夹目录</label>
+            <input type="text" class="form-control" id="dir"
+                   name="operateUserName" style="width:400px;margin-left: 20px"
+                   placeholder="请输入文件夹目录" value="">
+            <button class="btn btn-default" style="margin-left: 20px" onclick="beginTest()">开始分析
+            </button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="container">
+</div>
+<div class="modal" id="imgBiggerDiv" role="dialog"
+     style="margin-top: 10%;margin-left: 10%;z-index: 10002">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="imgBiggerContent">
+            <div class="modal-header">
+                <input type="button" class="btn btn-default" value="原图" desc="0">
+                <input type="button" class="btn btn-default" value="放大" desc="1">
+                <input type="button" class="btn btn-default" value="缩小" desc="2">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        id="biggerDivButton">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="imgBiggerBody" style="padding: 0px"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+

@@ -1,0 +1,416 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>第一个 ECharts 实例</title>
+    <script src="/resource?name=echarts.min.js"></script>
+    <script src="/resource?name=walden.js"></script>
+    <link rel="stylesheet" href="/resource?name=bootstrap.min.css">
+    <script src="/resource?name=jquery.min.js"></script>
+    <script src="/resource?name=bootstrap.min.js"></script>
+    <style>
+        .table-scroll {
+            float: left;
+            border-right: 1px solid #ddd;
+            margin-left: 5px;
+            margin-right: 5px;
+            display: flex;
+            width: 100%;
+            overflow-x: scroll;
+        }
+
+        th {
+            white-space: nowrap;
+            overflow: hidden;
+            word-break: keep-all;
+        }
+
+        .table tbody tr td {
+            text-align: center !important;
+        }
+    </style>
+    <script>
+        $(function () {
+            getFeature()
+        })
+
+        function getFeature() {
+            let dir = $("#dir").val();
+            let map = {"dir": dir};
+            $.ajax({
+                url: "/feature/get",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(map),
+                success: function (result) {
+                    addTable(result, "feature")
+                },
+            })
+        }
+
+        function addTable(result, type) {
+            let tableId = type + "-table";
+            $("#" + tableId).remove()
+            let table = $("<table class='table' id='" + tableId + "'></table>");
+            addHead(table, result.x, result.y, type)
+            addData(table, result.y, result.data, type)
+            let tableDiv = $("#" + type + "-table-div");
+            tableDiv.append(table)
+            $("#" + type + "-container").append(tableDiv)
+        }
+
+        function addHead(table, x, y, type) {
+            let length = 0;
+            for (let col = 0; col < y.length; col++) {
+                let tmp = y[col].length
+                if (length < tmp) {
+                    length = tmp
+                }
+            }
+            let blankStr = "";
+            for (let i = 0; i < length; i++) {
+                blankStr += "&emsp;";
+            }
+            let thead = $("<thead id='" + type + "-table-head'></thead>");
+            let row = $("<tr></tr>")
+            let blank = $("<th>" + blankStr + "</th>");
+            row.append(blank)
+            for (let i = 0; i < x.length; i++) {
+                let temp = $("<th>" + x[i] + "</th>")
+                row.append(temp)
+            }
+            thead.append(row)
+            table.append(thead)
+        }
+
+        function addData(table, y, data, type) {
+            let tbody = $("<tbody id='" + type + "-table-body'></tbody>");
+            for (let col = 0; col < y.length; col++) {
+                let row = $("<tr></tr>")
+                let temp = $("<td>" + y[col] + "</td>")
+                row.append(temp)
+                for (let r = 0; r < data[col].length; r++) {
+                    let temp1 = $("<td>" + data[col][r] + "</td>")
+                    row.append(temp1)
+                }
+                tbody.append(row)
+            }
+            table.append(tbody)
+        }
+    </script>
+</head>
+<body>
+<div class="panel panel-default" style="margin-bottom: 20px;margin-top: 0px;">
+    <div class="panel-heading">
+        <div class="form-group" style="display:flex;align-items: center;justify-content: center">
+            <label for="dir">文件夹目录</label>
+            <input type="text" class="form-control" id="dir"
+                   name="operateUserName" style="width:400px;margin-left: 20px"
+                   placeholder="请输入文件夹目录" value="">
+            <button class="btn btn-default" style="margin-left: 20px" onclick="getFeature()">特征提取
+            </button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="feature-container">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="feature-tips">特征信息如下</div>
+    <div class="table-scroll" id="feature-table-div"></div>
+</div>
+<div class="panel panel-default" style="margin-bottom: 20px;margin-top: 0px;">
+    <div class="panel-heading">
+        <div class="form-group" style="display:flex;align-items: center;justify-content: center">
+            <button class="btn btn-default" style="margin-left: 20px" onclick="getFeature()">特征分析
+            </button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="heatmap-container">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="heatmap-tips">热力图</div>
+    <div class="table-scroll" id="heatmap-table-div"></div>
+</div>
+<div id="main" style="width: 600px;height:400px;"></div>
+<div id="main2" style="width: 600px;height:400px;margin-top: 100px"></div>
+<div id="main3" style="width: 600px;height:400px;margin-top: 100px"></div>
+<div id="main4" style="width: 600px;height:400px;margin-top: 100px"></div>
+<div id="main5" style="width: 600px;height:400px;margin-top: 100px"></div>
+<script type="text/javascript">
+    var myChart = echarts.init(document.getElementById('main'), "walden");
+    // 指定图表的配置项和数据
+    option = {
+        xAxis: {},
+        yAxis: {},
+        legend: {
+            data: ['类别一', '类别二']
+        },
+        series: [
+            {
+                name: '类别一',
+                type: 'scatter',
+                data: [
+                    [10, 5],
+                    [0, 8],
+                    [6, 10],
+                    [2, 12],
+                    [8, 9]
+                ],
+                label: {
+                    emphasis: {
+                        show: true,
+                        position: 'top',
+                        formatter: function (params) {
+                            return "提示" + params.value;
+                        }
+                    }
+                },
+            }, {
+                name: '类别二',
+                type: 'scatter',
+                data: [
+                    [-10, -5],
+                    [0, -8],
+                    [-6, -10],
+                    [-2, -12],
+                    [-8, -9]
+                ]
+            }
+        ]
+    };
+    // 使用刚指定的配置项和数据显示图表。
+    myChart.setOption(option);
+
+
+    const hours = [
+        '12a', '1a', '2a', '3a', '4a', '5a', '6a',
+        '7a', '8a', '9a', '10a', '11a',
+        '12p', '1p', '2p', '3p', '4p', '5p',
+        '6p', '7p', '8p', '9p', '10p', '11p'
+    ];
+    // prettier-ignore
+    const days = [
+        'Saturday', 'Friday', 'Thursday',
+        'Wednesday', 'Tuesday', 'Monday', 'Sunday'
+    ];
+    // prettier-ignore
+    const data = [[0, 0, 5], [0, 1, 1], [0, 2, 0], [0, 3, 0], [0, 4, 0], [0, 5, 0], [0, 6, 0], [0, 7, 0], [0, 8, 0], [0, 9, 0], [0, 10, 0], [0, 11, 2], [0, 12, 4], [0, 13, 1], [0, 14, 1], [0, 15, 3], [0, 16, 4], [0, 17, 6], [0, 18, 4], [0, 19, 4], [0, 20, 3], [0, 21, 3], [0, 22, 2], [0, 23, 5], [1, 0, 7], [1, 1, 0], [1, 2, 0], [1, 3, 0], [1, 4, 0], [1, 5, 0], [1, 6, 0], [1, 7, 0], [1, 8, 0], [1, 9, 0], [1, 10, 5], [1, 11, 2], [1, 12, 2], [1, 13, 6], [1, 14, 9], [1, 15, 11], [1, 16, 6], [1, 17, 7], [1, 18, 8], [1, 19, 12], [1, 20, 5], [1, 21, 5], [1, 22, 7], [1, 23, 2], [2, 0, 1], [2, 1, 1], [2, 2, 0], [2, 3, 0], [2, 4, 0], [2, 5, 0], [2, 6, 0], [2, 7, 0], [2, 8, 0], [2, 9, 0], [2, 10, 3], [2, 11, 2], [2, 12, 1], [2, 13, 9], [2, 14, 8], [2, 15, 10], [2, 16, 6], [2, 17, 5], [2, 18, 5], [2, 19, 5], [2, 20, 7], [2, 21, 4], [2, 22, 2], [2, 23, 4], [3, 0, 7], [3, 1, 3], [3, 2, 0], [3, 3, 0], [3, 4, 0], [3, 5, 0], [3, 6, 0], [3, 7, 0], [3, 8, 1], [3, 9, 0], [3, 10, 5], [3, 11, 4], [3, 12, 7], [3, 13, 14], [3, 14, 13], [3, 15, 12], [3, 16, 9], [3, 17, 5], [3, 18, 5], [3, 19, 10], [3, 20, 6], [3, 21, 4], [3, 22, 4], [3, 23, 1], [4, 0, 1], [4, 1, 3], [4, 2, 0], [4, 3, 0], [4, 4, 0], [4, 5, 1], [4, 6, 0], [4, 7, 0], [4, 8, 0], [4, 9, 2], [4, 10, 4], [4, 11, 4], [4, 12, 2], [4, 13, 4], [4, 14, 4], [4, 15, 14], [4, 16, 12], [4, 17, 1], [4, 18, 8], [4, 19, 5], [4, 20, 3], [4, 21, 7], [4, 22, 3], [4, 23, 0], [5, 0, 2], [5, 1, 1], [5, 2, 0], [5, 3, 3], [5, 4, 0], [5, 5, 0], [5, 6, 0], [5, 7, 0], [5, 8, 2], [5, 9, 0], [5, 10, 4], [5, 11, 1], [5, 12, 5], [5, 13, 10], [5, 14, 5], [5, 15, 7], [5, 16, 11], [5, 17, 6], [5, 18, 0], [5, 19, 5], [5, 20, 3], [5, 21, 4], [5, 22, 2], [5, 23, 0], [6, 0, 1], [6, 1, 0], [6, 2, 0], [6, 3, 0], [6, 4, 0], [6, 5, 0], [6, 6, 0], [6, 7, 0], [6, 8, 0], [6, 9, 0], [6, 10, 1], [6, 11, 0], [6, 12, 2], [6, 13, 1], [6, 14, 3], [6, 15, 4], [6, 16, 0], [6, 17, 0], [6, 18, 0], [6, 19, 0], [6, 20, 1], [6, 21, 2], [6, 22, 2], [6, 23, 6]]
+        .map(function (item) {
+            return [item[1], item[0], item[2] || '-'];
+        });
+    option2 = {
+        tooltip: {
+            position: 'top'
+        },
+        grid: {
+            height: '50%',
+            top: '10%'
+        },
+        xAxis: {
+            type: 'category',
+            data: hours,
+            splitArea: {
+                show: true
+            }
+        },
+        yAxis: {
+            type: 'category',
+            data: days,
+            splitArea: {
+                show: true
+            }
+        },
+        visualMap: {
+            min: 0,
+            max: 10,
+            calculable: true,
+            orient: 'horizontal',
+            left: 'center',
+            bottom: '15%',
+            inRange: {
+                color: ['red', 'green']
+            }
+        },
+        series: [
+            {
+                name: 'Punch Card',
+                type: 'heatmap',
+                data: data,
+                label: {
+                    show: true
+                },
+                emphasis: {
+                    itemStyle: {
+                        shadowBlur: 10,
+                        shadowColor: 'rgba(0, 0, 0, 0.5)'
+                    }
+                }
+            }
+        ]
+    };
+    var myChart2 = echarts.init(document.getElementById('main2'), "walden");
+    myChart2.setOption(option2);
+
+
+    option3 = {
+        title: {
+            text: 'Stacked Line'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        legend: {
+            data: ['Email', 'Union Ads', 'Video Ads', 'Direct', 'Search Engine']
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: {
+            type: 'category',
+            boundaryGap: false,
+            data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                name: 'Email',
+                type: 'line',
+                stack: 'Total',
+                data: [120, 132, 101, 134, 90, 230, 210]
+            },
+            {
+                name: 'Union Ads',
+                type: 'line',
+                stack: 'Total',
+                data: [220, 182, 191, 234, 290, 330, 310]
+            },
+            {
+                name: 'Video Ads',
+                type: 'line',
+                stack: 'Total',
+                data: [150, 232, 201, 154, 190, 330, 410]
+            },
+            {
+                name: 'Direct',
+                type: 'line',
+                stack: 'Total',
+                data: [320, 332, 301, 334, 390, 330, 320]
+            },
+            {
+                name: 'Search Engine',
+                type: 'line',
+                stack: 'Total',
+                data: [820, 932, 901, 934, 1290, 1330, 1320]
+            }
+        ]
+    };
+    var myChart3 = echarts.init(document.getElementById('main3'), "walden");
+    myChart3.setOption(option3);
+
+
+    option4 = {
+
+        title: {
+            text: '某地区降水量',
+            subtext: '纯属虚构'
+        },
+        tooltip: {
+            trigger: 'axis'
+        },
+        grid: {
+            left: '3%',
+            right: '4%',
+            bottom: '3%',
+            containLabel: true
+        },
+        xAxis: [{
+            type: 'category',
+            data: ['1月', '2月', '3月', '4月', '5月', '6月', '7月', '8月', '9月', '10月', '11月', '12月'],
+            splitLine: {
+                show: false
+            },
+            axisTick: {
+                alignWithLabel: true
+            }
+        }],
+        yAxis: [{
+            type: 'value',
+            splitLine: {
+                show: false
+            },
+            splitArea: {
+                show: true,
+            },
+        }],
+        series: [{
+            name: '降水量',
+            type: 'bar',
+            label: {
+                normal: {
+                    show: true,
+                    position: 'top'
+                }
+            },
+            itemStyle: {
+                normal: {
+                    // 随机显示
+                    //color:function(d){return "#"+Math.floor(Math.random()*(256*256*256-1)).toString(16);}
+                    // 定制显示（按顺序）
+                    // color: function (params) {
+                    //     var colorList = ['#C33531', '#EFE42A', '#64BD3D', '#EE9201', '#29AAE3', '#B74AE5', '#0AAF9F', '#E89589', '#16A085', '#4A235A', '#C39BD3', '#F9E79F', '#BA4A00', '#ECF0F1', '#616A6B', '#EAF2F8', '#4A235A', '#3498DB'];
+                    //     return colorList[params.dataIndex]
+                    // }
+                },
+            },
+            data: [32.6, 25.9, 39.0, 26.4, 28.7, 70.7, 75.6, 82.2, 48.7, 58.8, 16.0, 32.3],
+        }]
+    };
+    var myChart4 = echarts.init(document.getElementById('main4'), "walden");
+    myChart4.setOption(option4);
+
+    option5 = {
+        xAxis: {
+            type: 'category',
+            data: ['Mon']
+        },
+        yAxis: {
+            type: 'value'
+        },
+        series: [
+            {
+                data: [120],
+                type: 'bar',
+                label: {
+                    normal: {
+                        show: true,
+                        position: 'top',
+                        formatter: function (params) {
+                            return "提示" + params.value;
+                        }
+                    }
+                }
+            }, {
+                data: [55],
+                type: 'bar'
+            }, {
+                data: [423],
+                type: 'bar'
+            }, {
+                data: [2],
+                type: 'bar'
+            }, {
+                data: [224],
+                type: 'bar'
+            }, {
+                data: [20],
+                type: 'bar'
+            },
+        ]
+    };
+    var myChart5 = echarts.init(document.getElementById('main5'), "walden");
+    myChart5.setOption(option5);
+</script>
+</body>
+</html>

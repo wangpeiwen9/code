@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>可配置页面</title>
+    <link rel="stylesheet" href="/resource?name=bootstrap.min.css">
+    <script src="/resource?name=jquery.min.js"></script>
+    <script src="/resource?name=bootstrap.min.js"></script>
+    <style>
+        .div-unit {
+            height: 460px;
+            width: 95%;
+            float: left;
+            border: 1px solid black;
+            margin-left: 5px;
+            margin-top: 10px;
+        }
+
+        .div-pic-list {
+            height: 400px;
+            border-right: 1px solid #ddd;
+            margin-left: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            margin-bottom: 50px;
+        }
+
+        .pic-unit {
+            border: 1px solid black;
+            margin-left: 5px;
+            margin-top: 2px;
+        }
+
+        .pic {
+            width: 210px;
+            height: 300px;
+            margin-left: 5px;
+        }
+
+        .desc {
+            width: 210px;
+        }
+    </style>
+    <script>
+        var searchList;
+        var bigShow = false;
+        var imgs;
+        var currentWidth = null
+        var originalWidth = null
+        $(function () {
+            getConfig()
+            $('#imgBiggerDiv').on('show.bs.modal', function (event) {
+                imgs = $(event.relatedTarget).find('img');
+                imgs.each(function () {
+                    var src = $(this).attr("src");
+                    var image = new Image();
+                    image.src = src;
+                    //图片原始的宽度和长度
+                    originalWidth = image.width;
+                })
+                showPictrues(imgs)
+            });
+        })
+        $(document).mousedown(function (event) {
+            if (bigShow == true) {
+                if (event.target.type == 'button') {
+                    type = event.target.getAttribute('desc');
+                    operate(type);
+                    return;
+                }
+                $('#biggerDivButton').click();
+                bigShow = false;
+                imgs = null;
+                currentWidth = null;
+                originalWidth = null;
+            }
+        });
+
+        function showPictrues(imgs2Show) {
+            var imgBiggerBody = $('#imgBiggerBody');
+            imgBiggerBody.empty();
+            if (currentWidth == null) {
+                imgs2Show.each(function () {
+                    var src = $(this).attr("src");
+                    var image = new Image();
+                    image.src = src;
+                    //图片原始的宽度和长度
+                    originalWidth = image.width;
+                    currentWidth = originalWidth;
+                })
+            }
+            $.each(imgs2Show, function (i, n) {
+                imgBiggerBody.append("<img src='" + n.src + "' style='margin: 0px;width:" +
+                    currentWidth + "px;'>");
+            });
+            contentWidth = currentWidth + 2;
+            $('#imgBiggerBody').css("width", currentWidth + "px");
+            $('#imgBiggerContent').css("width", contentWidth + "px");
+            bigShow = true;
+        }
+
+        function operate(type) {
+            if (type == 0) {
+                currentWidth = originalWidth
+                console.info("currentWidth=" + currentWidth)
+            }
+            if (type == 1) {
+                currentWidth = currentWidth * 1.1;
+            }
+            if (type == 2) {
+                currentWidth = currentWidth * 0.9;
+            }
+            showPictrues(imgs);
+        }
+
+        function getConfig() {
+            $.ajax({
+                url: "/nocode/config",
+                method: "GET",
+                success: function (result) {
+                    searchList = result;
+                    addSearch(searchList)
+                },
+            })
+        }
+
+        function addSearch() {
+            for (let i = 0; i < searchList.length; i++) {
+                let search = searchList[i];
+                let div = $("<div class='form-group' style='display:flex;align-items: center;margin-left: 300px'></div>");
+                addOne(search, div)
+                $("#search").append(div)
+            }
+            let div = $("<div class='form-group' style='display:flex;align-items: center;margin-left: 300px'></div>");
+            let button = $("<button class='btn btn-default' style='margin-left: 200px' onclick='beginTest()'>提交</button>");
+            div.append(button)
+            $("#search").append(div)
+        }
+
+        function addOne(search, container) {
+            let id = search.id;
+            let type = search.type;
+            let scope = search.scope
+            let label = $("<label for='" + id + "' style='width: 150px'>" + search.name +
+                "</label>");
+            container.append(label)
+            if (type == 'float' || type == 'int') {
+                let place = ''
+                if (type == 'float') {
+                    place += '输入小数'
+                }
+                if (type == 'int') {
+                    place += '输入整数'
+                }
+                place += ",取值范围" + scope[0] + "到" + scope[1]
+                let div = $("<input type='text' class='form-control'"
+                    + " id='" + id + "'"
+                    + " ntype='" + type + "'"
+                    + " cnName='" + search.name + "'"
+                    + " start='" + scope[0] + "'"
+                    + " end='" + scope[1] + "'"
+                    + " placeholder='" + place + "'"
+                    + " nFiled='search'"
+                    + "name='" + id + "' style='width:400px;margin-left: 20px'>")
+                container.append(div)
+            }
+            if (type == 'image') {
+                let file = $("<input type='file' style='margin-left: 20px' "
+                    + " id='" + id + "'"
+                    + " ntype='" + type + "'"
+                    + " cnName='" + search.name + "'"
+                    + " nFiled='search'"
+                    + " name='" + id + "'"
+                    + ">")
+                container.append(file)
+            }
+            if (type == 'text') {
+                let div = $("<select class='form-control'"
+                    + " id='" + id + "'"
+                    + " ntype='" + type + "'"
+                    + " cnName='" + search.name + "'"
+                    + " nFiled='search'"
+                    + "name='" + id + "' style='width:200px;margin-left: 20px'></select>")
+                let choice = search.choice
+                for (var key in choice) {
+                    var option = $("<option>").text(choice[key]);
+                    div.append(option);
+                }
+                container.append(div)
+            }
+        }
+
+        function beginTest() {
+            let formFile = new FormData();
+            let inputList = $("input[nFiled='search']")
+            let selectList = $("select[nFiled='search']")
+            for (let i = 0; i < inputList.length; i++) {
+                let result = valid(inputList[i], formFile)
+                if (!result) {
+                    return;
+                }
+            }
+            for (let i = 0; i < selectList.length; i++) {
+                let result = valid(selectList[i], formFile)
+                if (!result) {
+                    return;
+                }
+            }
+            formFile.append("action", "/nocode/submit");
+
+            var data = formFile;
+            $.ajax({
+                url: "/nocode/submit",
+                data: data,
+                type: "Post",
+                dataType: "json",
+                cache: false,//上传文件无需缓存
+                processData: false,//用于对data参数进行序列化处理 这里必须false
+                contentType: false, //必须
+                success: function (result) {
+                    addResultList(result)
+                },
+            })
+        }
+
+        function addResultList(list) {
+            $("#container").empty();
+            let picList = $("<div class='div-pic-list'></div>");
+            for (let i = 0; i < list.length; i++) {
+                let obj = list[i]
+                let picUnit = getPicUnit(obj)
+                picList.append(picUnit)
+            }
+            $("#container").append(picList)
+        }
+
+        function getPicUnit(obj) {
+            let picUnit = $("<div class='pic-unit'></div>");
+            let pic = $("<div class='pic' data-toggle='modal' data-target='#imgBiggerDiv'></div>");
+            let img = $("<img src='" + obj.image + "' style='width: 100%;height: 100%'></img>");
+            let name = $("<div class='desc'>" + obj.name + "</div>");
+            let text = $("<div class='desc'>" + obj.text + "</div>");
+            pic.append(img)
+            picUnit.append(pic)
+            picUnit.append(name)
+            picUnit.append(text)
+            return picUnit
+        }
+
+        function valid(obj, formFile) {
+            let id = $(obj).attr("id");
+            let type = $(obj).attr("ntype");
+            let cnName = $(obj).attr("cnName")
+            if (type == 'float') {
+                let val = $(obj).val()
+                if (isStrEmpty(val)) {
+                    alert(cnName + "输入为空")
+                    return false;
+                }
+                if (!isNumber(val)) {
+                    alert(cnName + "输入的并不是小数")
+                    return false;
+                }
+
+                let inputFloat = parseFloat(val);
+                let start = $(obj).attr("start");
+                let startVal = parseFloat(start)
+                let end = $(obj).attr("end");
+                let endVal = parseFloat(end)
+                if (inputFloat < startVal) {
+                    alert(cnName + "输入的值小于" + start)
+                    return false;
+                }
+                if (inputFloat > endVal) {
+                    alert(cnName + "输入的值大于" + endVal)
+                    return false;
+                }
+                formFile.append(id, inputFloat);
+                return true
+            }
+            if (type == 'int') {
+                let val = $(obj).val()
+                if (isStrEmpty(val)) {
+                    alert(cnName + "输入为空")
+                    return false;
+                }
+                if (!isNumber(val)) {
+                    alert(cnName + "输入的并不是数字")
+                    return false;
+                }
+                if (!isInt(val)) {
+                    alert(cnName + "输入的并不是整数")
+                    return false;
+                }
+                let inputInt = parseInt(val);
+                let start = $(obj).attr("start");
+                let startVal = parseInt(start)
+                let end = $(obj).attr("end");
+                let endVal = parseInt(end)
+                if (inputInt < startVal) {
+                    alert(cnName + "输入的值小于" + start)
+                    return false;
+                }
+                if (inputInt > endVal) {
+                    alert(cnName + "输入的值大于" + endVal)
+                    return false;
+                }
+                formFile.append(id, inputInt);
+                return true
+            }
+            if (type == 'image') {
+                let fileObj = document.getElementById(id).files[0];
+                if (typeof (fileObj) == "undefined" || fileObj.size <= 0) {
+                    alert("请选择上传:" + cnName)
+                    return false;
+                }
+                formFile.append(id, fileObj);
+                return true
+            }
+            if (type == 'text') {
+                let inputText = $(obj).val();
+                if (isStrEmpty(inputText)) {
+                    alert(cnName + "选择为空")
+                    return false;
+                }
+                formFile.append(id, inputText);
+                return true
+            }
+            return false
+        }
+
+        function isNumber(val) {
+            if (parseFloat(val).toString() == "NaN") {
+                return false;
+            } else {
+                var reg = new RegExp("^(-?\\d+)(\\.\\d+)?$");
+                if (!reg.test(val)) {
+                    return false;
+                }
+                return true;
+            }
+        }
+
+        function isInt(val) {
+            return parseInt(val, 10) == val
+        }
+
+        function isStrEmpty(obj) {
+            if (typeof obj == "undefined" || obj == null || obj == "") {
+                return true;
+            } else {
+                return false;
+            }
+        }
+    </script>
+</head>
+<body>
+<div class="panel panel-default" style="margin-bottom: 40px;margin-top: 0px;">
+    <div class="panel-heading" id="search">
+    </div>
+</div>
+<div class="container-fluid" id="container">
+</div>
+<div class="modal" id="imgBiggerDiv" role="dialog"
+     style="margin-top: 10%;margin-left: 10%;z-index: 10002">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content" id="imgBiggerContent">
+            <div class="modal-header">
+                <input type="button" class="btn btn-default" value="原图" desc="0">
+                <input type="button" class="btn btn-default" value="放大" desc="1">
+                <input type="button" class="btn btn-default" value="缩小" desc="2">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                        id="biggerDivButton">
+                    <span aria-hidden="true">&times;</span></button>
+            </div>
+            <div class="modal-body" id="imgBiggerBody" style="padding: 0px"></div>
+        </div>
+    </div>
+</div>
+</body>
+</html>

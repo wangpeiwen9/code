@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>特征分析页面</title>
+    <script src="/resource?name=echarts.min.js"></script>
+    <script src="/resource?name=walden.js"></script>
+    <link rel="stylesheet" href="/resource?name=bootstrap.min.css">
+    <script src="/resource?name=jquery.min.js"></script>
+    <script src="/resource?name=bootstrap.min.js"></script>
+    <style>
+        .table-scroll {
+            border-right: 1px solid #ddd;
+            margin-left: 5px;
+            margin-right: 5px;
+            width: 100%;
+            overflow-x: scroll;
+            display: flex;
+        }
+
+        th {
+            white-space: nowrap;
+            overflow: hidden;
+            word-break: keep-all;
+            text-align: center;
+        }
+
+        .table tbody tr td {
+            text-align: center !important;
+        }
+
+        .label-title {
+
+            margin-left: 5px;
+        }
+
+        .font-style {
+            font-size: 22px;
+            font-family: PingFangSC-Regular, PingFang SC;
+            font-weight: 400;
+            color: #262324;
+        }
+
+        .radio_style {
+            width: 20px;
+            height: 20px;
+            position: relative !important;
+        }
+    </style>
+    <script>
+        function getFeature() {
+            let dir = $("#dir").val();
+            let map = {"dir": dir};
+            $.ajax({
+                url: "/feature/get",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(map),
+                success: function (result) {
+                    mockData = result
+                    addTable(result, "feature")
+                    $("#feature-tips").text("特征信息如下")
+                    $("#btn-panel").css("display", "")
+                },
+            })
+        }
+
+        function addTable(result, type) {
+            let tableId = type + "-table";
+            $("#" + tableId).remove()
+            let table = $("<table class='table' id='" + tableId + "'></table>");
+            addHead(table, result.x, result.y, type)
+            addData(table, result.y, result.data, type)
+            let tableDiv = $("#" + type + "-table-div");
+            tableDiv.append(table)
+            $("#" + type + "-container").append(tableDiv)
+        }
+
+        function addHead(table, x, y, type) {
+            let length = 0;
+            for (let col = 0; col < y.length; col++) {
+                let tmp = y[col].length
+                if (length < tmp) {
+                    length = tmp
+                }
+            }
+            let blankStr = "";
+            let thead = $("<thead id='" + type + "-table-head'></thead>");
+            let row = $("<tr></tr>")
+            let blank = $("<th>" + blankStr + "</th>");
+            row.append(blank)
+            for (let i = 0; i < x.length; i++) {
+                let temp = $("<th>" + x[i] + "</th>")
+                row.append(temp)
+            }
+            thead.append(row)
+            table.append(thead)
+        }
+
+        function addData(table, y, data, type) {
+            let tbody = $("<tbody id='" + type + "-table-body'></tbody>");
+            for (let col = 0; col < y.length; col++) {
+                let row = $("<tr></tr>")
+                let temp = $("<td>" + y[col] + "</td>")
+                row.append(temp)
+                for (let r = 0; r < data[col].length; r++) {
+                    let temp1 = $("<td>" + getNumRound3(data[col][r]) + "</td>")
+                    row.append(temp1)
+                }
+                tbody.append(row)
+            }
+            table.append(tbody)
+        }
+
+        function getNumRound3(num) {
+            return num.toFixed(3)
+        }
+
+        function analyze() {
+            let dir = $("#dir").val();
+            let map = {"dir": dir};
+            $("#msg").text("正在分析中....")
+            $.ajax({
+                url: "/analyze/get",
+                method: "POST",
+                contentType: "application/json",
+                data: JSON.stringify(map),
+                success: function (result) {
+                    $("#desc-container").css("display", "")
+                    $("#heatmap-container").css("display", "")
+                    $("#pvalue-container").css("display", "")
+                    $("#cluster-container").css("display", "")
+                    addTable(result.desc, "desc")
+                    addHeapMap(result.cov)
+                    addTable(result.pvalue, "pvalue")
+                    addCluster(result.cluster)
+                    $("#msg").text("")
+                    $("#model-button-container").css("display", "")
+                },
+            })
+
+        }
+
+        function addHeapMap(result) {
+            let x = result.x;
+            let y = []
+            for (let i = result.y.length - 1; i >= 0; i--) {
+                y.push(result.y[i])
+            }
+            let data = result.data
+            let showData = []
+            for (let r = 0; r < x.length; r++) {
+                for (let col = 0; col < y.length; col++) {
+                    let row = [];
+                    row.push(r)
+                    row.push(y.length - col - 1)
+                    row.push(getNumRound3(data[r][col]))
+                    showData.push(row)
+                }
+            }
+            option2 = {
+                tooltip: {
+                    position: 'top'
+                },
+                xAxis: {
+                    type: 'category',
+                    data: x,
+                    splitArea: {
+                        show: true
+                    }
+                },
+                yAxis: {
+                    type: 'category',
+                    data: y,
+                    splitArea: {
+                        show: true
+                    }
+                },
+                visualMap: {
+                    min: -1,
+                    max: 1,
+                    calculable: true,
+                    orient: 'horizontal',
+                    right: 'center',
+                    align: 'right',
+                    top: 'top',
+                    inRange: {
+                        color: ['red', 'green']
+                    }
+                },
+                series: [
+                    {
+                        name: '热力图',
+                        type: 'heatmap',
+                        data: showData,
+                        label: {
+                            show: true
+                        },
+                        emphasis: {
+                            itemStyle: {
+                                shadowBlur: 10,
+                                shadowColor: 'rgba(0, 0, 0, 0.5)'
+                            }
+                        }
+                    }
+                ],
+                dataZoom: [{
+                    type: 'slider',
+                    show: true,
+                    start: 0,
+                    end: 60,
+                    bottom: '10px',
+                }],
+                grid: {
+                    left: '2%',
+                    right: '2%',
+                    containLabel: true
+                },
+                toolbox: { //可视化的工具箱
+                    show: true,
+                    feature: {
+                        dataView: { //数据视图
+                            show: true
+                        },
+                        restore: { //重置
+                            show: true
+                        },
+                        dataZoom: { //数据缩放视图
+                            show: true
+                        },
+                        saveAsImage: {//保存图片
+                            show: true
+                        },
+                        magicType: {//动态类型切换
+                            type: ['bar', 'line']
+                        }
+                    }
+                },
+            };
+            $("#heatmap-table-div").removeAttr("_echarts_instance_").empty();
+            let height = y.length * 40 + 50;
+            $("#heatmap-table-div").height(height);
+            var myChart2 = echarts.init(document.getElementById('heatmap-table-div'), "walden");
+            myChart2.setOption(option2);
+        }
+
+        function addCluster(result) {
+            let indexTipMap = new Map();
+            let map = new Map();
+            let cateList = []
+            let cateCnList = []
+            for (let i = 0; i < result.length; i++) {
+                let cate = result[i][1];
+                cateList.push(cate)
+                cateCnList.push("类别-" + cate)
+                let data = [getNumRound3(result[i][2]), getNumRound3(result[i][3])]
+                let list = map.get(cate)
+                if (!list) {
+                    list = []
+                }
+                list.push(data)
+                map.set(cate, list)
+                let tipList = indexTipMap.get(cate)
+                if (!tipList) {
+                    tipList = []
+                }
+                tipList.push(result[i][0])
+                indexTipMap.set(cate, tipList)
+            }
+            let series = []
+            for (let i = 0; i < cateList.length; i++) {
+                let cate = cateList[i];
+                let data = map.get(cate)
+                let tipIndexList = indexTipMap.get(cate)
+                let serie = {}
+                serie.name = cateCnList[i];
+                serie.type = 'scatter';
+                serie.data = data
+                let formatter = function (params) {
+                    // let val = ",值(" + data[params.dataIndex][0] + "," + data[params.dataIndex][1] + ")"
+                    // return "文件夹" + tipIndexList[params.dataIndex] + val;
+                    return tipIndexList[params.dataIndex]
+                }
+                let emphasis = {}
+                emphasis.show = true;
+                emphasis.position = 'top';
+                emphasis.formatter = formatter;
+                let label = {};
+                label.emphasis = emphasis
+                serie.label = label
+                series.push(serie)
+            }
+            option = {
+                legend: {
+                    data: cateCnList
+                },
+                xAxis: {},
+                yAxis: {},
+                series: series
+            }
+            $("#cluster-table-div").removeAttr("_echarts_instance_").empty();
+            var myChart = echarts.init(document.getElementById('cluster-table-div'), "walden");
+            myChart.setOption(option);
+        }
+
+        function addModel(result) {
+            let series = []
+            for (let i = 0; i < result.length; i++) {
+                let serie = {}
+                serie.data = [getNumRound3(result[i][1])]
+                let formatter = function (params) {
+                    return result[params.seriesIndex][0] + "值:" + params.value
+                }
+                let normal = {}
+                normal.show = true;
+                normal.position = 'top';
+                normal.formatter = formatter;
+                let label = {};
+                label.normal = normal
+                serie.type = 'bar';
+                serie.label = label
+                series.push(serie)
+            }
+            option = {
+                xAxis: {
+                    type: 'category',
+                    data: ['模型分析']
+                },
+                yAxis: {type: 'value'},
+                series: series
+            }
+            $("#model-table-div").removeAttr("_echarts_instance_").empty()
+            var myChart = echarts.init(document.getElementById('model-table-div'), "walden");
+            myChart.setOption(option);
+        }
+
+        function getModel() {
+            $("#msg1").text("模型正在分析中....")
+            var fileObj = document.getElementById("label").files[0]; // js 获取文件对象
+            if (typeof (fileObj) == "undefined" || fileObj.size <= 0) {
+                $("#msg1").text("")
+                alert("请选择标签的文件");
+                return;
+            }
+            var task = $("input[name='task']:checked").val()
+            if (!task) {
+                $("#msg1").text("")
+                alert("选择模型的类型");
+                return;
+            }
+            var formFile = new FormData();
+            formFile.append("action", "/model_results");
+            formFile.append("file", fileObj);
+            formFile.append("task", task);
+            var data = formFile;
+            $.ajax({
+                url: "/model_results",
+                data: data,
+                type: "Post",
+                dataType: "json",
+                cache: false,//上传文件无需缓存
+                processData: false,//用于对data参数进行序列化处理 这里必须false
+                contentType: false, //必须
+                success: function (result) {
+                    $("#model-table-div").css("display", "")
+                    addModel(result)
+                    $("#msg1").text("")
+                },
+            })
+        }
+    </script>
+</head>
+<body style="margin-bottom: 200px">
+<div class="panel panel-default" style="margin-bottom: 20px;margin-top: 0px;">
+    <div class="panel-heading">
+        <div class="form-group" style="display:flex;align-items: center;justify-content: center">
+            <label for="dir">文件夹目录</label>
+            <input type="text" class="form-control" id="dir"
+                   name="operateUserName" style="width:400px;margin-left: 20px"
+                   placeholder="请输入文件夹目录" value="">
+            <button class="btn btn-default" style="margin-left: 20px" onclick="getFeature()">特征提取
+            </button>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="feature-container">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="feature-tips"></div>
+    <div class="table-scroll" id="feature-table-div"></div>
+</div>
+<div class="panel panel-default"
+     style="margin-bottom: 20px;margin-top: 0px;display: none" id="btn-panel">
+    <div class="panel-heading">
+        <div class="form-group" style="display:flex;align-items: center;justify-content: center">
+            <button class="btn btn-default" style="margin-left: 20px" onclick="analyze()">
+                特征分析
+            </button>
+            <label id="msg" style="color: red;font-size: 24px;margin-left: 10px"></label>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="desc-container" style="display: none">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="desc-tips">描述</div>
+    <div class="table-scroll" id="desc-table-div" style="width: 100%;"></div>
+</div>
+<div class="container-fluid" id="heatmap-container" style="display: none">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="heatmap-tips">热力图</div>
+    <div class="table-scroll" id="heatmap-table-div" style="width: 100%;"></div>
+</div>
+<div class="container-fluid" id="pvalue-container" style="display: none">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="pvalue-tips">pvalue矩阵</div>
+    <div class="table-scroll" id="pvalue-table-div" style="width: 100%;"></div>
+</div>
+<div class="container-fluid" id="cluster-container" style="display: none">
+    <div style="margin: 0 auto;width: 200px;font-size: 24px;" id="cluster-tips">聚类分析</div>
+    <div class="table-scroll" id="cluster-table-div" style="width: 100%;height: 600px"></div>
+</div>
+<div class="panel panel-default" style="margin-bottom: 20px;margin-top: 0px;display: none"
+     id="model-button-container">
+    <div class="panel-heading">
+        <div class="form-group font-style" style="display:flex;align-items: center;">
+            <span class="label-title" style="margin-left: 100px">类型:</span>
+            <label class="radio-inline">
+                <input type="radio" name="task" value="reg" class="radio_style">
+                <span>reg回归</span>
+            </label>
+            <label class="radio-inline">
+                <input type="radio" name="task" value="clf" class="radio_style">
+                <span>clf分类</span>
+            </label>
+
+            <span class="label-title" style="margin-left:50px">选择上传标签文件:</span>
+            <input type="file" id="label">
+            <button class="btn btn-default" onclick="getModel()">
+                模型分析
+            </button>
+            <label id="msg1" style="color: red;font-size: 24px;margin-left: 10px"></label>
+        </div>
+    </div>
+</div>
+<div class="container-fluid" id="model-container">
+    <div class="table-scroll" id="model-table-div"
+         style="width: 100%;height: 600px;display: none"></div>
+</div>
+</body>
+</html>

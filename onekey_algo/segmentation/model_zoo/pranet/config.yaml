@@ -1,0 +1,14 @@
+# 数据存放位置
+# 如果是Image-Mask的自动识别方式，data_dir下需要有2个目录，一个文件
+  # 1. image，原始数据目录
+  # 2. mask, mask文件存放的目录
+  # 3. seg_labels.txt，每行一个label，表明mask中不同id的标签。
+data_dir: D:\20230428-Vince
+model_name: deeplabv3_resnet101
+epochs: 300
+# 准备数据的并行度，如果出现loader错误，改成0.
+workers: 4
+# 图像尺寸下采样率，默认不下采样。当显存不够的时候，可以考虑下采样。
+downsample_ratio: 1
+# 模型存放的位置
+save_dir: D:\20230428-Vince\models
